@@ -7,7 +7,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "test": "jest",
+    "test": "karma start --single-run",
     "karma-single": "karma start --single-run",
     "karma": "karma start"
   },
@@ -28,6 +28,7 @@
     "crc32": "^0.2.2",
     "dotenv": "^8.1.0",
     "flush-promises": "^1.0.2",
+    "fs": "^0.0.1-security",
     "jest-transform-stub": "^2.0.0",
     "karma": "^4.3.0",
     "karma-chai": "^0.1.0",

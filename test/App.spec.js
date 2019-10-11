@@ -17,6 +17,8 @@ import MovieFinder from "../src/components/MovieFinder";
 import lodash from "lodash";
 import MovieDetail from "../src/components/MovieDetail";
 import {describe} from "mocha";
+import MovieSearch from "../src/components/MovieSearch";
+import Autocomplete from "@trevoreyre/autocomplete-vue";
 
 const fakeResponse = require('./fake-response');
 const data = fakeResponse.data;
@@ -122,7 +124,7 @@ describe("Validate Clicking a Movie", function (done) {
         toPress.trigger("click");
 
         await flushPromises();
-        await delay(2500);
+        await delay(2000);
 
         let movieDetail = wrapper.find(MovieDetail);
 
@@ -196,6 +198,126 @@ describe("Validate Clicking a Movie", function (done) {
     });
 });
 
+describe("Autocomplete", function (done) {
+    this.timeout(0);
+
+    it("Autocomplete Works for Clockwork Orange", async () => {
+        let wrapper = await getMountedApp();
+        await flushPromises();
+
+        let movieSearch = wrapper.contains(MovieSearch);
+        expect(movieSearch, "There should be a movie search component").to.be.true;
+
+        movieSearch = wrapper.find(MovieSearch);
+
+        let movieSearchInput = movieSearch.contains("input#search-input");
+        expect(movieSearchInput, "The movie search input should exist").to.be.true;
+
+        movieSearchInput = movieSearch.find("input#search-input");
+
+        movieSearchInput.element.value="Clockwork Orange";
+        movieSearchInput.trigger("input");
+
+        await delay(2000);
+
+        let autocompleteResults = movieSearch.contains("li.autocomplete-result");
+        expect(autocompleteResults, "There should be some autocomplete results").to.be.true;
+
+        autocompleteResults = movieSearch.findAll("li.autocomplete-result");
+
+        expect(autocompleteResults.length, "There should be at least one autocomplete result for Clockwork Orange").to.be.greaterThan(0);
+
+        let found = autocompleteResults.filter(w => {
+            return w.text().match(/Clockwork Orange/);
+        });
+
+        expect(found.length, "There should be at least one item matching 'Clockwork Orange'").to.be.greaterThan(0);
+    });
+});
+
+describe("Search and Click Dark Knight", function (done) {
+    this.timeout(0);
+
+    it("Search Works for Dark Knight", async () => {
+        let wrapper = await getMountedApp();
+        await flushPromises();
+
+        let movieSearch = wrapper.contains(MovieSearch);
+        expect(movieSearch, "There should be a movie search component").to.be.true;
+
+        movieSearch = wrapper.find(MovieSearch);
+
+        let movieSearchInput = movieSearch.contains("input#search-input");
+        expect(movieSearchInput, "The movie search input should exist").to.be.true;
+
+        movieSearchInput = movieSearch.find("input#search-input");
+
+        movieSearchInput.element.value="Dark Knight";
+        movieSearchInput.trigger("input");
+        await delay(2000);
+
+        let autocompleteResults = movieSearch.contains("li.autocomplete-result");
+        expect(autocompleteResults, "There should be some autocomplete results").to.be.true;
+
+        autocompleteResults = movieSearch.findAll("li.autocomplete-result");
+
+        expect(autocompleteResults.length, "There should be at least one autocomplete result for Dark Knight").to.be.greaterThan(0);
+
+        let found = autocompleteResults.filter(w => {
+            return w.text().match(/Dark Knight/);
+        });
+
+        expect(found.length, "There should be at least one item matching 'Dark Knight'").to.be.greaterThan(0);
+
+        let it = found.at(0);
+
+        it.trigger("click");
+        await delay(2000);
+
+        // This is wonky but it should find an error.
+        expect(wrapper.html(), "The title should be present").to.contain("The Dark Knight");
+        expect(wrapper.html(), "The title should be present").to.contain("Batman");
+
+
+    });
+});
+
+describe("Search Works", function (done) {
+    this.timeout(0);
+
+    it("Search Works for Batman", async () => {
+        let wrapper = await getMountedApp();
+        await flushPromises();
+
+        let finder = wrapper.contains(MovieList);
+        expect(finder, "There should be a movie list").to.be.true;
+
+        finder = wrapper.find(MovieList);
+        finder.vm.changeMovies("batman");
+
+        await delay(2000);
+
+        // This is wonky but it should find an error.
+        expect(wrapper.html(), "The title should be present").to.contain("The Dark Knight");
+        expect(wrapper.html(), "The title should be present").to.contain("Batman");
+    });
+
+    it("Search Works for No Results", async () => {
+        let wrapper = await getMountedApp();
+        await flushPromises();
+
+        let finder = wrapper.contains(MovieList);
+        expect(finder, "There should be a movie list").to.be.true;
+
+        finder = wrapper.find(MovieList);
+        finder.vm.changeMovies("!!noresults!!");
+
+        await delay(2000);
+
+        // This is wonky but it should find an error.
+        expect(wrapper.html(), "There should be no results").to.contain("There are no results");
+    });
+});
 
 /**
  * Validates and gets all the genre lists from the main page.
@@ -233,7 +355,7 @@ async function getMountedApp() {
     });
 
     console.trace("Starting delay...");
-    await delay(2250);
+    await delay(2000);
     console.trace("Finished delay...");
 
     return wrapper;

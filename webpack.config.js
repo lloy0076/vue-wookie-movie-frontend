@@ -58,7 +58,11 @@ module.exports = {
     performance: {
         hints: false
     },
-    devtool: '#eval-source-map'
+    devtool: '#eval-source-map',
+    // Stop stupid webpack silliness.
+    node: {
+        fs: 'empty'
+    },
 };
 
 if (process.env.NODE_ENV === 'production') {

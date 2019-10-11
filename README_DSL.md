@@ -16,8 +16,16 @@ yarn run build
 ```
 
 ### Run your tests
+To run a Karma test only once:
+
 ```
 yarn run test
+```
+
+To run continously, e.g. during development:
+
+```
+yarn run karma
 ```
 
 ### Lints and fixes files
