@@ -1,0 +1,269 @@
+{
+	"info": {
+		"_postman_id": "811063ec-bf88-462d-bdec-39e37734334b",
+		"name": "Leveredge - Wookie",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Wookie Movies",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a6ad844c-5ee2-4e07-9119-85c8885356aa",
+						"exec": [
+							"pm.test(\"Check Movies Structure\", function () {",
+							"  let data = pm.response.json();",
+							"  ",
+							"  // We should have \"movies\"",
+							"  pm.expect(data).to.have.property(\"movies\");",
+							"  ",
+							"  let movies = data.movies;",
+							"  ",
+							"  // Make sure we get the expected number of movies; the API seems to respond with 20.",
+							"  let expectedLength = 20;",
+							"  ",
+							"  // http://urlregex.com/",
+							"  let urlPattern = /((([A-Za-z]{3,9}:(?:\\/\\/)?)(?:[\\-;:&=\\+\\$,\\w]+@)?[A-Za-z0-9\\.\\-]+|(?:www\\.|[\\-;:&=\\+\\$,\\w]+@)[A-Za-z0-9\\.\\-]+)((?:\\/[\\+~%\\/\\.\\w\\-_]*)?\\??(?:[\\-\\+=&;%@\\.\\w_]*)#?(?:[\\.\\!\\/\\\\\\w]*))?)/;",
+							"  ",
+							"  // e.g. 13+, 18+, 7+ etc.",
+							"  let classificationPattern = /^\\d+\\+?$/;",
+							" ",
+							"  let positiveNumber = /^\\d+$/;",
+							" ",
+							"  // e.g. \"d6822b7b-48bb-4b78-ad5e-9ba04c517ec8\"",
+							"  let idPattern = /^(?:[a-z0-9]+-){3,4}[a-z0-9]+$/;",
+							"  ",
+							"  // https://stackoverflow.com/questions/12756159/regex-and-iso8601-formatted-datetime",
+							"  let datePattern = /^(\\d{4})-(\\d{2})-(\\d{2})T(\\d{2})\\:(\\d{2})\\:(\\d{2})(?:[+-](\\d{2})\\:(\\d{2}))?$/;",
+							"  ",
+							"  // e.g. the-dark-knight-2008",
+							"  let slugPattern = /^(\\w+-)+(\\d{4})$/;",
+							"  ",
+							"  pm.expect(movies).to.not.have.lengthOf.below(expectedLength);",
+							"  pm.expect(movies).to.not.have.lengthOf.above(expectedLength);",
+							"  pm.expect(movies).to.have.lengthOf(expectedLength);",
+							"  ",
+							"  /*",
+							"   * Iterate over all of the movies and check each structure.",
+							"   */",
+							"  movies.forEach(function (movie, movieIndex, movieArray) {",
+							"      pm.expect(movie).to.have.property('backdrop').and.to.match(urlPattern, \"Backdrop should be a URL\");",
+							"      pm.expect(movie).to.have.property('classification').and.to.match(classificationPattern, \"Classification should be a classification\");",
+							"        ",
+							"      pm.expect(movie).to.have.property('genres').and.to.be.an('array');",
+							"      ",
+							"      if (movie.genres.length > 0) {",
+							"          let genres = movie.genres;",
+							"          ",
+							"          genres.forEach(function (genre, genreIndex, genresaRray) {",
+							"             pm.expect(genre).to.be.a('number').that.match(positiveNumber, \"Genre should be a positive number\");",
+							"          });",
+							"      }",
+							"      ",
+							"      pm.expect(movie).to.have.property('id').and.to.match(idPattern, \"ID should be match the ID pattern\");",
+							"      pm.expect(movie).to.have.property('imdb_rating').and.to.be.a('number', \"IMDB rating should be a number\");",
+							"      pm.expect(movie).to.have.property('overview').and.not.to.be.empty;",
+							"      ",
+							"      pm.expect(movie).to.have.property('released_on').and.to.match(datePattern, \"Released on should be an ISO8601 date\");",
+							"      ",
+							"      let releasedMatch = datePattern.exec(movie.released_on);",
+							"      let releaseYear = releasedMatch[1];",
+							"      ",
+							"      pm.expect(movie).to.have.property('slug').and.to.match(slugPattern, \"Slug should match the slug pattern\");",
+							"      ",
+							"      let slugMatch = slugPattern.exec(movie.slug);",
+							"      let slugYear = slugMatch.slice(-1)[0];",
+							"      ",
+							"      pm.expect(releaseYear).to.equal(slugYear, `The year in the slug, \"${slugYear}\"\", should match the release year, \"${releaseYear}\"`);",
+							"      ",
+							"      pm.expect(movie).to.have.property('title').and.to.not.be.empty;",
+							"  });",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://wookie.codesubmit.io/movies",
+					"protocol": "https",
+					"host": [
+						"wookie",
+						"codesubmit",
+						"io"
+					],
+					"path": [
+						"movies"
+					]
+				},
+				"description": "Get the movies."
+			},
+			"response": []
+		},
+		{
+			"name": "Search Wookie Movies",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "a7bb4195-d9da-4b9e-8912-ea8d3bec8193",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "6bbe528b-2c10-45e2-83a4-bad5d77a7356",
+						"exec": [
+							"pm.test(\"Check Result Structure\", function () {",
+							"  let data = pm.response.json();",
+							"  ",
+							"  // We should have \"movies\"",
+							"  pm.expect(data).to.have.property(\"movies\");",
+							"  ",
+							"  let movies = data.movies;",
+							"  ",
+							"  // Make sure we get the expected number of movies; the API seems to respond with 20.",
+							"  let expectedLength = 20;",
+							"  ",
+							"  // http://urlregex.com/",
+							"  let urlPattern = /((([A-Za-z]{3,9}:(?:\\/\\/)?)(?:[\\-;:&=\\+\\$,\\w]+@)?[A-Za-z0-9\\.\\-]+|(?:www\\.|[\\-;:&=\\+\\$,\\w]+@)[A-Za-z0-9\\.\\-]+)((?:\\/[\\+~%\\/\\.\\w\\-_]*)?\\??(?:[\\-\\+=&;%@\\.\\w_]*)#?(?:[\\.\\!\\/\\\\\\w]*))?)/;",
+							"  ",
+							"  // e.g. 13+, 18+, 7+ etc.",
+							"  let classificationPattern = /^\\d+\\+?$/;",
+							" ",
+							"  let positiveNumber = /^\\d+$/;",
+							" ",
+							"  // e.g. \"d6822b7b-48bb-4b78-ad5e-9ba04c517ec8\"",
+							"  let idPattern = /^(?:[a-z0-9]+-){3,4}[a-z0-9]+$/;",
+							"  ",
+							"  // https://stackoverflow.com/questions/12756159/regex-and-iso8601-formatted-datetime",
+							"  let datePattern = /^(\\d{4})-(\\d{2})-(\\d{2})T(\\d{2})\\:(\\d{2})\\:(\\d{2})(?:[+-](\\d{2})\\:(\\d{2}))?$/;",
+							"  ",
+							"  // e.g. the-dark-knight-2008",
+							"  let slugPattern = /^(\\w+-)+(\\d{4})$/;",
+							"  ",
+							"  pm.expect(movies).to.have.length.above(0);",
+							"  ",
+							"  /*",
+							"   * Iterate over all of the movies and check each structure.",
+							"   */",
+							"  movies.forEach(function (movie, movieIndex, movieArray) {",
+							"      pm.expect(movie).to.have.property('backdrop').and.to.match(urlPattern, \"Backdrop should be a URL\");",
+							"      pm.expect(movie).to.have.property('classification').and.to.match(classificationPattern, \"Classification should be a classification\");",
+							"        ",
+							"      pm.expect(movie).to.have.property('genres').and.to.be.an('array');",
+							"      ",
+							"      if (movie.genres.length > 0) {",
+							"          let genres = movie.genres;",
+							"          ",
+							"          genres.forEach(function (genre, genreIndex, genresaRray) {",
+							"             pm.expect(genre).to.be.a('number').that.match(positiveNumber, \"Genre should be a positive number\");",
+							"          });",
+							"      }",
+							"      ",
+							"      pm.expect(movie).to.have.property('id').and.to.match(idPattern, \"ID should be match the ID pattern\");",
+							"      pm.expect(movie).to.have.property('imdb_rating').and.to.be.a('number', \"IMDB rating should be a number\");",
+							"      pm.expect(movie).to.have.property('overview').and.not.to.be.empty;",
+							"      ",
+							"      pm.expect(movie).to.have.property('released_on').and.to.match(datePattern, \"Released on should be an ISO8601 date\");",
+							"      ",
+							"      let releasedMatch = datePattern.exec(movie.released_on);",
+							"      let releaseYear = releasedMatch[1];",
+							"      ",
+							"      pm.expect(movie).to.have.property('slug').and.to.match(slugPattern, \"Slug should match the slug pattern\");",
+							"      ",
+							"      let slugMatch = slugPattern.exec(movie.slug);",
+							"      let slugYear = slugMatch.slice(-1)[0];",
+							"      ",
+							"      pm.expect(releaseYear).to.equal(slugYear, `The year in the slug, \"${slugYear}\"\", should match the release year, \"${releaseYear}\"`);",
+							"      ",
+							"      pm.expect(movie).to.have.property('title').and.to.not.be.empty;",
+							"  });",
+							"})",
+							"",
+							"pm.test(\"Check We Got Sane Result\", function () {",
+							"    let data = pm.response.json();",
+							"    let params = pm.request.url.query.all();",
+							"    ",
+							"    let query = '';",
+							"    params.forEach(function (value, index, paramsArray) {",
+							"       if (value.key == 'q') {",
+							"           query = value.value;",
+							"           return;",
+							"       }",
+							"    });",
+							"    ",
+							"    let movieMatch = /.*/;",
+							"    ",
+							"    if (query !== '') {",
+							"        movieMatch = new RegExp(`${query}`, 'i');",
+							"    }",
+							"    ",
+							"    let movies = data.movies;",
+							"    ",
+							"    let found = false;",
+							"    /*",
+							"     * Iterate over all of the movies and check each structure.",
+							"     */",
+							"  movies.forEach(function (movie, movieIndex, movieArray) {",
+							"      if (movieMatch.test(movie.title)) {",
+							"          found = true;",
+							"          return;",
+							"      }",
+							"  });",
+							"  ",
+							"  pm.expect(found, `A movie with an overview or title containing the search \"${query}\" should be found`).to.be.true;",
+							"})",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://wookie.codesubmit.io/movies?q=",
+					"protocol": "https",
+					"host": [
+						"wookie",
+						"codesubmit",
+						"io"
+					],
+					"path": [
+						"movies"
+					],
+					"query": [
+						{
+							"key": "q",
+							"value": ""
+						}
+					]
+				},
+				"description": "Search the movies."
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "Wookie2019",
+				"type": "string"
+			}
+		]
+	},
+	"protocolProfileBehavior": {}
+}
