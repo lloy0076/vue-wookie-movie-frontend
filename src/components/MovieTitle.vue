@@ -1,6 +1,6 @@
 <template>
     <div class="title-area">
-        <h1 style="margin-bottom: 0;"><router-link to="/">Wookie<br>Movies</router-link></h1>
+        <h1 style="margin-bottom: 0;"><router-link to="/">Our<br>Movies</router-link></h1>
     </div>
 </template>
 
